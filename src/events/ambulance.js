@@ -8,7 +8,7 @@
   const MAX = SEG * 60, ACCEL = MAX / 4.5, BRAKE = MAX * 1.1, OFFROAD_DECEL = MAX * .7, OFFROAD_LIMIT = MAX * .3;
   const STEER = 2.3, CENTRIFUGAL = .3, PW = .15; // PW: half the ambulance's width, road edge = 1
   const MILES = 17;                              // Sequim to Port Angeles on 101, roughly
-  const DRAIN = .6;                              // patient health lost per second, always
+  const DRAIN = 1.15;                            // patient health lost per second, always
   const HOLD = 1.5;                              // stretches every straight and curve; sets the run length
 
   // ---------- sprites (built on first play, after the fonts load) ----------
@@ -177,7 +177,7 @@
     return cars;
   }
   function makePickups(segs, finish) {
-    const r = rng(3016), out = [], kinds = ['medkit', 'wrench', 'medkit', 'medkit', 'wrench', 'medkit', 'wrench', 'medkit', 'wine', 'medkit', 'wrench', 'medkit', 'medkit', 'wrench', 'wine', 'medkit', 'wrench', 'medkit', 'wine', 'medkit'];
+    const r = rng(3016), out = [], kinds = ['medkit', 'wrench', 'medkit', 'wrench', 'medkit', 'wine', 'medkit', 'wrench', 'medkit', 'wrench', 'medkit', 'wine', 'wrench', 'medkit'];
     kinds.forEach((kind, k) => { const i = Math.round(260 + (finish - 500) * (k + .2 + r() * .6) / kinds.length); out.push({ kind, seg: i, x: [-2 / 3, 0, 2 / 3][Math.floor(r() * 3)], got: false }); });
     return out;
   }
@@ -290,9 +290,9 @@
         for (const p of s.pickups) {
           if (p.got || p.seg < segOld.i - 1 || p.seg > pseg.i + 1 || Math.abs(p.x - s.x) > .32) continue;
           p.got = true; s.picked++;
-          if (p.kind === 'medkit') { s.patient = Math.min(100, s.patient + 22); say('+ PATIENT', '#ff8ab0'); Sound.jingle([659, 880, 1175], { step: .05 }); }
-          else if (p.kind === 'wrench') { s.amb = Math.min(100, s.amb + 25); say('+ AMBULANCE', '#4fd6ff'); Sound.jingle([523, 659, 784], { step: .05, type: 'triangle' }); }
-          else { s.patient = Math.min(100, s.patient + 35); s.wine++; s.wineT = 4; say('SWEET WHITE WINE!', '#f4cc80', 2); Sound.jingle([784, 988, 1175, 1568], { step: .07, type: 'triangle' }); }
+          if (p.kind === 'medkit') { s.patient = Math.min(100, s.patient + 15); say('+ PATIENT', '#ff8ab0'); Sound.jingle([659, 880, 1175], { step: .05 }); }
+          else if (p.kind === 'wrench') { s.amb = Math.min(100, s.amb + 20); say('+ AMBULANCE', '#4fd6ff'); Sound.jingle([523, 659, 784], { step: .05, type: 'triangle' }); }
+          else { s.patient = Math.min(100, s.patient + 25); s.wine++; s.wineT = 4; say('SWEET WHITE WINE!', '#f4cc80', 2); Sound.jingle([784, 988, 1175, 1568], { step: .07, type: 'triangle' }); }
         }
         if (s.patient <= 0) { s.patient = 0; end('patient'); }
         else if (s.amb <= 0) { s.amb = 0; end('ambulance'); }
@@ -432,10 +432,10 @@
         if (Math.floor(s.t * 2) % 2 === 0) T(c, KEYBOARD ? 'PRESS ENTER' : 'TAP TO START', 160, 136, '#ffffff', { a: 'c' });
       } else if (s.phase === 'end') {
         const lines = s.endKind === 'arrive' ? ['ARRIVED!', 'SEBASTIAN IS IN GOOD HANDS']
-          : s.endKind === 'patient' ? ['SEBASTIAN GOT TIRED OF WAITING', 'AND SKATED THERE HIMSELF'] : ['THE AMBULANCE GAVE OUT.', 'SEBASTIAN SKATED THE REST'];
-        box(c, 40, 56, 240, 34, '#0e0c1e', s.endKind === 'arrive' ? '#3cc060' : '#d83a2a', 2);
-        TO(c, lines[0], 160, 61, s.endKind === 'arrive' ? '#ffd84a' : '#ff8ab0', '#0e0c14', null, { a: 'c' });
-        T(c, lines[1], 160, 77, '#ffffff', { f: 's', a: 'c' });
+          : s.endKind === 'patient' ? ['TOO SLOW!', 'SEBASTIAN GOT TIRED OF WAITING', 'AND SKATED THERE HIMSELF'] : ['BROKE DOWN!', 'THE AMBULANCE GAVE OUT.', 'SEBASTIAN SKATED THE REST'];
+        box(c, 50, 52, 220, 22 + lines.length * 9, '#0e0c1e', s.endKind === 'arrive' ? '#3cc060' : '#d83a2a', 2);
+        TO(c, lines[0], 160, 57, s.endKind === 'arrive' ? '#ffd84a' : '#ff8ab0', '#0e0c14', null, { a: 'c' });
+        lines.slice(1).forEach((l, i) => T(c, l, 160, 73 + i * 9, '#ffffff', { f: 's', a: 'c' }));
       }
     }
 
