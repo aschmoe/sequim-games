@@ -91,7 +91,9 @@ const TitleScene = {
 
 // ---------- event menu ----------
 const MenuScene = {
-  enter() { this.list = menuEvents(); this.t = 0; this.flash = null; this.sel = this.sel ?? 0; },
+  // fsRect: tap target the engine checks inside the tap itself (fullscreen needs a live gesture); fsKey: F toggles
+  fsKey: true,
+  enter() { this.list = menuEvents(); this.t = 0; this.flash = null; this.sel = this.sel ?? 0; this.fsRect = Fullscreen.supported && !KEYBOARD ? [110, 156, 110, 24] : null; },
   update(dt) {
     this.t += dt;
     const pick = i => { const e = this.list[i]; this.sel = i;
@@ -124,6 +126,7 @@ const MenuScene = {
     });
     T(c, KEYBOARD ? 'H: HIGH SCORES' : 'HIGH SCORES', 10, 164, '#4fd6ff', { f: 's' });
     if (KEYBOARD) T(c, 'ARROWS + ENTER', 160, 164, '#8a84b0', { f: 's', a: 'c' });
+    else if (this.fsRect) T(c, Fullscreen.active ? 'EXIT FULL SCREEN' : 'FULL SCREEN', 160, 164, '#4fd6ff', { f: 's', a: 'c' });
     T(c, (KEYBOARD ? 'M: ' : '') + (Sound.on ? 'SOUND ON' : 'SOUND OFF'), 310, 164, '#4fd6ff', { f: 's', a: 'r' });
   },
 };

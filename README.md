@@ -27,6 +27,7 @@ There is no framework and no bundler: `build.sh` concatenates the files in `src/
 - `src/shell.js`: event registry, title, menu, pause, results, name entry, high scores, `boot()`
 - `src/events/*.js`: one file per event
 - `design/`: the mockup board used while planning (`design/build.sh`)
+- `static/`: copied into `dist/` as is (web app manifest, home-screen icons)
 - `tools/`: Playwright bots and screenshot scripts used for testing and balance
 
 ## Adding an event
@@ -35,6 +36,13 @@ There is no framework and no bundler: `build.sh` concatenates the files in `src/
 2. `create(api)` returns `{ update(dt), draw(ctx), pause?, destroy? }` and calls
    `api.finish({ score, headline, stats })` when the run ends.
 3. Add the file to `build.sh` and the id to `PLANNED` in `src/shell.js` to set its menu position.
+
+## Phones
+
+On Android the first tap switches to fullscreen and locks landscape; the menu has a FULL SCREEN
+button to toggle it (F on a keyboard). Chrome's "Add to Home screen" installs it with its own icon,
+always fullscreen (`static/manifest.webmanifest`). Icons are drawn from the title art by
+`node tools/make-icons.js` after a build.
 
 ## Handy URLs
 

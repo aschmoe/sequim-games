@@ -97,10 +97,17 @@ function endPtr(e) {
   if (!p.swiped && Math.hypot(p.x - p.sx, p.y - p.sy) < 10 && performance.now() - p.t < 400) Input.taps.push({ x: p.sx, y: p.sy });
   Input.ptrs.delete(e.pointerId);
 }
-screenEl.addEventListener('pointerup', endPtr);
+screenEl.addEventListener('pointerup', e => {
+  // Fullscreen may only be requested inside a tap's own event handler, not later in the frame loop.
+  // Phones go fullscreen on their first tap; after that only the scene's button toggles it.
+  const g = Input.toGame(e), r = Shell.scene?.fsRect;
+  if (r && Fullscreen.supported && inRect(g, ...r)) Fullscreen.toggle();
+  else if (!KEYBOARD && !Fullscreen.autoTried) { Fullscreen.autoTried = true; Fullscreen.enter(); }
+  endPtr(e);
+});
 screenEl.addEventListener('pointercancel', e => { const p = Input.ptrs.get(e.pointerId); if (p) Input.ups.push({ id: e.pointerId, x: p.x, y: p.y, cancel: true }); Input.ptrs.delete(e.pointerId); });
 screenEl.addEventListener('contextmenu', e => e.preventDefault());
-addEventListener('keydown', e => { if (!Input.keys.has(e.code)) Input.pressed.add(e.code); Input.keys.add(e.code); Sound.unlock(); if (e.code.startsWith('Arrow') || e.code === 'Space') e.preventDefault(); });
+addEventListener('keydown', e => { if (e.code === 'KeyF' && !e.repeat && Shell.scene?.fsKey) Fullscreen.toggle(); if (!Input.keys.has(e.code)) Input.pressed.add(e.code); Input.keys.add(e.code); Sound.unlock(); if (e.code.startsWith('Arrow') || e.code === 'Space') e.preventDefault(); });
 addEventListener('keyup', e => Input.keys.delete(e.code));
 addEventListener('blur', () => { Input.keys.clear(); Input.ptrs.clear(); });
 
@@ -213,5 +220,19 @@ const Scores = {
 };
 // on a computer, show keyboard hints instead of touch hints
 const KEYBOARD = matchMedia('(pointer: fine)').matches;
+// fullscreen + landscape lock (Android Chrome); not offered where unsupported (iPhone Safari)
+// or when already launched from the home screen, which is fullscreen by manifest
+const Fullscreen = {
+  supported: !!document.documentElement.requestFullscreen && !matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches,
+  autoTried: false,
+  get active() { return !!document.fullscreenElement; },
+  enter() {
+    if (!this.supported || this.active) return;
+    document.documentElement.requestFullscreen({ navigationUI: 'hide' })
+      .then(() => screen.orientation?.lock?.('landscape').catch(() => {}))
+      .catch(() => {});
+  },
+  toggle() { if (this.active) document.exitFullscreen().catch(() => {}); else this.enter(); },
+};
 const midi = n => 440 * Math.pow(2, (n - 69) / 12);
 const fmt = n => Math.round(n).toLocaleString('en-US');

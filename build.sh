@@ -10,6 +10,7 @@ mkdir -p dist
   echo 'boot();'
   echo '</script>'
 } > dist/index.html
+cp static/* dist/
 # Syntax check the inlined script when node is available
 if command -v node >/dev/null 2>&1; then
   sed -n '/^<script>$/,/^<\/script>$/p' dist/index.html | sed '1d;$d' > dist/.check.js

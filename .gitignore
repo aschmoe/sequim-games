@@ -2,4 +2,5 @@ dist/
 design/dist/
 node_modules/
 *.png
+!static/*.png
 .DS_Store
