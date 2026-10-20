@@ -6,9 +6,9 @@
   const SEG = 200, ROAD_W = 1200, LANES = 3, RUMBLE = 3, DRAW = 150;
   const CAM_H = 1000, DEPTH = 1 / Math.tan(50 * Math.PI / 180), PLAYER_Z = CAM_H * DEPTH, HORIZON = H / 2;
   const MAX = SEG * 60, ACCEL = MAX / 4.5, BRAKE = MAX * 1.1, OFFROAD_DECEL = MAX * .7, OFFROAD_LIMIT = MAX * .3;
-  const STEER = 2.3, CENTRIFUGAL = .3, PW = .15; // PW: half the ambulance's width, road edge = 1
+  const STEER = 3.4, CENTRIFUGAL = .3, PW = .15; // PW: half the ambulance's width, road edge = 1
   const MILES = 17;                              // Sequim to Port Angeles on 101, roughly
-  const DRAIN = 1.05;                            // patient health lost per second, always
+  const DRAIN = 1.3;                             // patient health lost per second, always
   const HOLD = 1.5;                              // stretches every straight and curve; sets the run length
   const CURVE = .6;                              // scales every curve in COURSE; lower is gentler
 
@@ -182,9 +182,9 @@
     const r = rng(2016), cars = [];
     const zoneSpan = z => { const list = segs.filter(s => s.zone === z); return [list[0].i, list[list.length - 1].i]; };
     const spec = [
-      [0, 12, () => r() < .4 ? ['tractor', .2, 330] : [['sedanR', 'sedanB', 'pickup'][Math.floor(r() * 3)], .42 + r() * .1, 340]],
-      [1, 24, () => { const q = r(); return q < .35 ? ['logs', .38 + r() * .06, 420] : q < .5 ? ['rv', .36, 440] : [['sedanY', 'sedanG', 'sedanB', 'pickup'][Math.floor(r() * 4)], .45 + r() * .12, 340]; }],
-      [2, 21, () => [['sedanR', 'sedanB', 'sedanY', 'sedanG', 'pickup'][Math.floor(r() * 5)], .36 + r() * .12, 340]],
+      [0, 20, () => r() < .4 ? ['tractor', .2, 330] : [['sedanR', 'sedanB', 'pickup'][Math.floor(r() * 3)], .42 + r() * .1, 340]],
+      [1, 40, () => { const q = r(); return q < .35 ? ['logs', .38 + r() * .06, 420] : q < .5 ? ['rv', .36, 440] : [['sedanY', 'sedanG', 'sedanB', 'pickup'][Math.floor(r() * 4)], .45 + r() * .12, 340]; }],
+      [2, 36, () => [['sedanR', 'sedanB', 'sedanY', 'sedanG', 'pickup'][Math.floor(r() * 5)], .36 + r() * .12, 340]],
     ];
     for (const [z, n, pick] of spec) {
       const [a, b] = zoneSpan(z);
@@ -198,10 +198,10 @@
   // things on the road: potholes everywhere, hay off farm trucks near Sequim, logs off logging
   // trucks on 101, and road-work zones whose cones close a lane
   const HAZARD = {
-    pothole: { ww: 420, hw: .14, amb: 3, patient: 4, slow: .85, msg: 'POTHOLE!' },
-    cone: { ww: 130, hw: .06, amb: 3, patient: 1, slow: .92, msg: 'CONE!', fly: true },
-    hay: { ww: 300, hw: .13, amb: 10, patient: 5, cap: .35, msg: 'HAY BALE!', fly: true, crash: true },
-    log: { ww: 650, hw: .27, amb: 14, patient: 7, cap: .25, msg: 'LOG!', crash: true },
+    pothole: { ww: 420, hw: .14, amb: 6, patient: 7, slow: .85, msg: 'POTHOLE!' },
+    cone: { ww: 130, hw: .06, amb: 5, patient: 3, slow: .92, msg: 'CONE!', fly: true },
+    hay: { ww: 300, hw: .13, amb: 16, patient: 9, cap: .35, msg: 'HAY BALE!', fly: true, crash: true },
+    log: { ww: 650, hw: .27, amb: 22, patient: 12, cap: .25, msg: 'LOG!', crash: true },
   };
   function makeHazards(segs, finish) {
     const r = rng(4016), out = [], lane = () => [-2 / 3, 0, 2 / 3][Math.floor(r() * 3)];
@@ -209,16 +209,17 @@
     const scatter = (z, kind, n, jitter = .12) => { const [a, b] = zoneSpan(z); for (let k = 0; k < n; k++) out.push({ kind, seg: Math.round(a + 60 + (b - a - 100) * (k + .1 + r() * .8) / n), x: lane() + (r() - .5) * jitter * 2 }); };
     const work = (seg, x, len) => { segs[seg - 40]?.sprites.push({ img: S.signWork, off: x < 0 ? -1.2 : 1.2, ww: 1150, solid: true });
       for (let k = 0; k < len; k += 4) for (const dx of [-.14, .14]) out.push({ kind: 'cone', seg: seg + k, x: x + dx }); };
-    scatter(0, 'pothole', 10); scatter(0, 'hay', 6, 0);
-    scatter(1, 'pothole', 14); scatter(1, 'log', 8, 0);
-    scatter(2, 'pothole', 12);
+    scatter(0, 'pothole', 14); scatter(0, 'hay', 8, 0);
+    scatter(1, 'pothole', 18); scatter(1, 'log', 11, 0);
+    scatter(2, 'pothole', 16);
     { const [a, b] = zoneSpan(0); work(Math.round(a + (b - a) * .55), -2 / 3, 60); }
+    { const [a, b] = zoneSpan(1); work(Math.round(a + (b - a) * .45), 0, 60); }
     { const [a, b] = zoneSpan(2); work(Math.round(a + (b - a) * .3), 2 / 3, 60); work(Math.round(a + (b - a) * .7), -2 / 3, 60); }
     for (const h of out) Object.assign(h, { hit: false, flyT: 0 });
     return out;
   }
   function makePickups(segs, finish) {
-    const r = rng(3016), out = [], kinds = ['medkit', 'wrench', 'medkit', 'wrench', 'medkit', 'wine', 'medkit', 'wrench', 'medkit', 'wrench', 'medkit', 'wine', 'wrench', 'medkit'];
+    const r = rng(3016), out = [], kinds = ['medkit', 'wrench', 'medkit', 'wine', 'wrench', 'medkit', 'wrench', 'wine', 'medkit'];
     kinds.forEach((kind, k) => { const i = Math.round(260 + (finish - 500) * (k + .2 + r() * .6) / kinds.length); out.push({ kind, seg: i, x: [-2 / 3, 0, 2 / 3][Math.floor(r() * 3)], got: false }); });
     return out;
   }
@@ -293,7 +294,7 @@
       if (off && s.speed > OFFROAD_LIMIT) s.speed = Math.max(OFFROAD_LIMIT, s.speed - OFFROAD_DECEL * dt);
       // steering, plus the curve pushing you outward
       const dx = dt * STEER * pct;
-      s.steer += ((right ? 1 : left ? -1 : 0) - s.steer) * Math.min(1, dt * 10);
+      s.steer += ((right ? 1 : left ? -1 : 0) - s.steer) * Math.min(1, dt * 18);
       s.x += s.steer * dx - dx * pct * pseg.curve * CENTRIFUGAL;
       s.x = clamp(s.x, -3, 3);
       const before = s.pos;
@@ -303,7 +304,7 @@
       if (s.phase === 'drive') {
         // health: the patient always needs the hospital; rough driving costs both bars
         s.patient -= DRAIN * dt;
-        if (off && s.speed > OFFROAD_LIMIT * .5) { s.patient -= 2.2 * dt; s.amb -= 1.4 * dt; s.shake = Math.max(s.shake, .6); }
+        if (off && s.speed > OFFROAD_LIMIT * .5) { s.patient -= 3 * dt; s.amb -= 2 * dt; s.shake = Math.max(s.shake, .6); }
         // traffic. Checked against where the ambulance was last frame too, so a slow frame can't skip a car.
         const pz = s.pos + PLAYER_Z, pzOld = before + PLAYER_Z, segOld = segAt(pzOld);
         for (const car of s.cars) {
@@ -314,7 +315,7 @@
           car.z += car.speed * dt;
           const d = car.z - pz;
           if (s.hitT <= 0 && dOld > -40 && d < 90 && s.speed > car.speed && Math.abs(car.x - s.x) < PW + car.hw) {
-            s.speed = car.speed * .5; s.pos = car.z - PLAYER_Z - 100; s.amb -= 14; s.patient -= 7; s.crashes++; s.hitT = .8; s.shake = 1.4;
+            s.speed = car.speed * .5; s.pos = car.z - PLAYER_Z - 100; s.amb -= 22; s.patient -= 11; s.crashes++; s.hitT = .8; s.shake = 1.4;
             car.x += car.x >= s.x ? .2 : -.2; crashSound(); say(['WATCH IT!', 'OOF!', 'SORRY!', 'HOLD ON, SEB!'][s.crashes % 4], '#ff8ab0');
           }
         }
@@ -324,7 +325,7 @@
           if (!sp.solid) continue;
           const span = sp.ww / ROAD_W * 2, a = sp.off < 0 ? sp.off - span : sp.off, b = sp.off < 0 ? sp.off : sp.off + span;
           if (s.x + PW > a && s.x - PW < b) {
-            s.speed = Math.min(s.speed, MAX / 6); s.pos = Math.max(0, seg.z - PLAYER_Z - 60); s.amb -= 16; s.patient -= 6; s.crashes++; s.hitT = .9; s.shake = 1.6;
+            s.speed = Math.min(s.speed, MAX / 6); s.pos = Math.max(0, seg.z - PLAYER_Z - 60); s.amb -= 22; s.patient -= 10; s.crashes++; s.hitT = .9; s.shake = 1.6;
             s.x -= Math.sign(s.x) * .3; crashSound(); say('STAY ON THE ROAD!', '#ff8ab0'); break hit;
           }
         }
