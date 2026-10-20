@@ -70,6 +70,27 @@ Rollback, on the server: `ls -t /srv/sequim-games/releases`, then
 `sudo -u deploy ln -sfn releases/<name> /srv/sequim-games/current`.
 Or re-run an earlier Deploy workflow from the Actions tab.
 
-## Scores
+## Scoreboard
 
-Scores are kept in `localStorage` for now. A small shared score API is planned for deployment.
+`server/server.js` is the shared scoreboard: plain Node with its built-in SQLite, no dependencies.
+The game keeps each score on the device until the server confirms it, so playing offline (or from
+a `file://` build) still works, and the scores upload the next time the page can reach `/api`.
+Any event id is accepted, so a new event needs no server change.
+
+On the server it runs as the `sequim-api` container (config in `/etc/sequim-games/compose.yml`),
+with the database at `/srv/sequim-games/api/data/scores.db`. A deploy that changes `server/`
+restarts it. Housekeeping, as root on the server:
+
+```sh
+docker exec sequim-api node admin.js list volt      # or just: list
+docker exec sequim-api node admin.js delete <id>
+docker exec sequim-api node admin.js clear all      # e.g. wipe test scores before the big reveal
+docker logs sequim-api
+```
+
+To run everything locally:
+
+```sh
+DB_PATH=/tmp/scores.db node server/server.js   # terminal 1
+./build.sh && node tools/dev-server.js         # terminal 2, then open http://localhost:8080
+```

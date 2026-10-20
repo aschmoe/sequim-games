@@ -13,6 +13,7 @@ mkdir -p dist
 # Syntax check the inlined script when node is available
 if command -v node >/dev/null 2>&1; then
   sed -n '/^<script>$/,/^<\/script>$/p' dist/index.html | sed '1d;$d' > dist/.check.js
-  node --check dist/.check.js && rm dist/.check.js
+  node --check dist/.check.js
+  rm dist/.check.js
 fi
 echo "built dist/index.html ($(wc -c < dist/index.html) bytes)"

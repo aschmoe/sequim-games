@@ -194,7 +194,7 @@ class NameScene {
   }
   press(k) {
     if (k === '<') { this.name = this.name.slice(0, -1); Sound.tone(300, .05); return; }
-    if (k === 'OK') { if (!this.name) return; try { localStorage.setItem('sequim:lastname', this.name); } catch (_) {} const rank = Scores.add(this.def.id, this.name, this.score); Sound.jingle([523, 784, 1047], { step: .08 }); Shell.go(new ScoresScene(this.def.id, rank, MenuScene)); return; }
+    if (k === 'OK') { if (!this.name) return; try { localStorage.setItem('sequim:lastname', this.name); } catch (_) {} const mine = Scores.add(this.def.id, this.name, this.score); Sound.jingle([523, 784, 1047], { step: .08 }); Shell.go(new ScoresScene(this.def.id, mine, MenuScene)); return; }
     if (this.name.length < 10) { this.name += k; Sound.tone(600 + this.name.length * 40, .05); }
   }
   draw(c) {
@@ -209,11 +209,12 @@ class NameScene {
 
 // ---------- high scores ----------
 class ScoresScene {
-  constructor(id, rank, back) { this.ids = EVENTS.map(e => e.id); this.i = Math.max(0, this.ids.indexOf(id)); this.rank = rank; this.back = back; this.t = 0; }
+  // mine: id of the score just entered, highlighted in the list
+  constructor(id, mine, back) { this.ids = EVENTS.map(e => e.id); this.i = Math.max(0, this.ids.indexOf(id)); this.mine = mine; this.back = back; this.t = 0; Scores.refresh(this.ids[this.i]); }
   update(dt) {
     this.t += dt;
-    if (this.ids.length > 1 && (Input.tapIn(0, 0, 40, 22) || Input.keyPressed('ArrowLeft'))) { this.i = (this.i + this.ids.length - 1) % this.ids.length; this.rank = -1; }
-    else if (this.ids.length > 1 && (Input.tapIn(280, 0, 40, 22) || Input.keyPressed('ArrowRight'))) { this.i = (this.i + 1) % this.ids.length; this.rank = -1; }
+    if (this.ids.length > 1 && (Input.tapIn(0, 0, 40, 22) || Input.keyPressed('ArrowLeft'))) { this.i = (this.i + this.ids.length - 1) % this.ids.length; Scores.refresh(this.ids[this.i]); }
+    else if (this.ids.length > 1 && (Input.tapIn(280, 0, 40, 22) || Input.keyPressed('ArrowRight'))) { this.i = (this.i + 1) % this.ids.length; Scores.refresh(this.ids[this.i]); }
     else if (this.t > .4 && (Input.taps.length || Input.keyPressed('Enter', 'Space', 'Escape'))) Shell.go(this.back);
   }
   draw(c) {
@@ -224,10 +225,11 @@ class ScoresScene {
     const l = def ? Scores.list(def.id) : [];
     if (!l.length) T(c, 'NO SCORES YET. GO SET ONE!', 160, 80, '#c8b8f0', { f: 's', a: 'c' });
     l.slice(0, 10).forEach((s, i) => {
-      const y = 24 + i * 13, me = i === this.rank, col = me ? '#4fd6ff' : i === 0 ? '#ffd84a' : '#ffffff';
+      const y = 24 + i * 13, me = s.id === this.mine, col = me ? '#4fd6ff' : i === 0 ? '#ffd84a' : '#ffffff';
       if (me) R(c, 8, y - 2, 304, 12, '#1c2c5a');
       T(c, String(i + 1), 26, y, col, { a: 'r' }); T(c, s.name, 36, y, col); T(c, fmt(s.score), 306, y, col, { a: 'r' });
     });
+    if (Scores.online === false) T(c, 'OFFLINE: SCORES WILL SYNC LATER', 160, 156, '#7a6aa0', { f: 's', a: 'c' });
     if (Math.floor(this.t * 2) % 2 === 0) T(c, KEYBOARD ? 'PRESS ENTER  /  ARROWS: OTHER EVENTS' : 'TAP TO CONTINUE', 160, 168, '#c8b8f0', { f: 's', a: 'c' });
   }
 }
@@ -248,5 +250,7 @@ async function boot() {
   PORTRAIT.seb = sprite(sebastianPortrait()); PORTRAIT.misha = sprite(mishaPortrait());
   const start = location.hash.startsWith('#play-') ? new PlayScene(EVENTS.find(e => e.id === location.hash.slice(6))) : TitleScene;
   Shell.go(start);
+  EVENTS.forEach(e => Scores.refresh(e.id));
+  addEventListener('visibilitychange', () => { if (!document.hidden) EVENTS.forEach(e => Scores.refresh(e.id)); });
   requestAnimationFrame(frame);
 }

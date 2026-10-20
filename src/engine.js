@@ -163,17 +163,52 @@ const Sound = {
 };
 try { Sound.on = localStorage.getItem('sequim:sound') !== '0'; } catch (_) {}
 
-// --- scores: localStorage for the prototype. The deployed build swaps this for the server API. ---
+// Shared scoreboard. The game reads a cached copy synchronously; uploads and refreshes happen
+// in the background. A score is kept on the phone until the server confirms it, so nothing is
+// lost offline (or when the page runs somewhere with no /api, like a file:// build).
 const Scores = {
-  key: id => 'sequim:scores:' + id,
-  list(id) { try { return JSON.parse(localStorage.getItem(this.key(id)) || '[]'); } catch (_) { return []; } },
+  api: '/api/scores/',
+  online: null,                                  // null = not asked yet, then true / false
+  boardKey: id => 'sequim:board:' + id,          // last top 10 from the server
+  pendingKey: 'sequim:pending',                  // scores not yet confirmed by the server
+  read(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (_) { return d; } },
+  write(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} },
+  list(id) {
+    const board = this.read(this.boardKey(id), []);
+    const mine = this.read(this.pendingKey, []).filter(p => p.event === id && !board.some(b => b.id === p.id));
+    return [...board, ...mine].sort((a, b) => b.score - a.score).slice(0, 10);
+  },
   best(id) { return this.list(id)[0] || null; },
   qualifies(id, score) { const l = this.list(id); return score > 0 && (l.length < 10 || score > l[l.length - 1].score); },
+  // returns the new entry's id so the scores screen can highlight it
   add(id, name, score) {
-    const l = this.list(id); const entry = { name, score, at: Date.now() };
-    l.push(entry); l.sort((a, b) => b.score - a.score); l.length = Math.min(l.length, 10);
-    try { localStorage.setItem(this.key(id), JSON.stringify(l)); } catch (_) {}
-    return l.indexOf(entry);
+    const entry = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 10), event: id, name, score, at: Date.now() };
+    this.write(this.pendingKey, [...this.read(this.pendingKey, []), entry]);
+    this.flush();
+    return entry.id;
+  },
+  async call(id, opts) {
+    const r = await fetch(this.api + id, { ...opts, headers: { 'Content-Type': 'application/json' } });
+    const body = (r.headers.get('content-type') || '').includes('json') ? await r.json() : null;
+    if (!body) throw new Error('no scoreboard here');
+    return { status: r.status, body };
+  },
+  flush() { return this._flushing ||= this._flush().finally(() => { this._flushing = null; }); },
+  async _flush() {
+    for (const p of this.read(this.pendingKey, [])) {
+      try {
+        const { status, body } = await this.call(p.event, { method: 'POST', body: JSON.stringify({ id: p.id, name: p.name, score: p.score }) });
+        if (status === 429 || status >= 500) { this.online = status < 500; return; }
+        if (body.scores) this.write(this.boardKey(p.event), body.scores);
+        this.write(this.pendingKey, this.read(this.pendingKey, []).filter(q => q.id !== p.id)); // saved, or rejected for good
+        this.online = true;
+      } catch (_) { this.online = false; return; }
+    }
+  },
+  async refresh(id) {
+    await this.flush();
+    try { const { status, body } = await this.call(id); if (status === 200 && body.scores) { this.write(this.boardKey(id), body.scores); this.online = true; } }
+    catch (_) { this.online = false; }
   },
 };
 // on a computer, show keyboard hints instead of touch hints

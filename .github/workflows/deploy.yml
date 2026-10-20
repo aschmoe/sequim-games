@@ -44,3 +44,16 @@ jobs:
           # Atomic symlink swap, then keep the 5 newest releases for rollback
           ssh "deploy@$DEPLOY_HOST" "cd /srv/sequim-games && ln -sfn releases/$REL current.tmp && mv -Tf current.tmp current && ls -1dt releases/*/ | tail -n +6 | xargs -r rm -rf"
           echo "Live: https://$DEPLOY_HOST ($REL)"
+
+      - name: Upload scoreboard API (restarts it only if the code changed)
+        if: steps.check.outputs.ready == 'true'
+        run: |
+          ssh "deploy@$DEPLOY_HOST" "mkdir -p /srv/sequim-games/api/app"
+          CHANGES=$(rsync -rz --checksum --delete --itemize-changes --chmod=D755,F644 server/ "deploy@$DEPLOY_HOST:/srv/sequim-games/api/app/")
+          if [ -n "$CHANGES" ]; then
+            echo "$CHANGES"
+            ssh "deploy@$DEPLOY_HOST" "date > /srv/sequim-games/api/restart"
+            echo "Scoreboard restart requested"
+          else
+            echo "Scoreboard unchanged"
+          fi
