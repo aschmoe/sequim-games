@@ -88,7 +88,9 @@ nginx -t
 systemctl reload nginx
 
 # 4. HTTPS (needs the DNS record for $DOMAIN pointing at this server)
-if getent hosts "$DOMAIN" >/dev/null; then
+if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
+  echo "HTTPS certificate for $DOMAIN already exists (Certbot renews it on its own)."
+elif getent hosts "$DOMAIN" >/dev/null; then
   certbot --nginx -d "$DOMAIN" --redirect
 else
   echo "!! $DOMAIN does not resolve yet. Add the DNS A record, then run: certbot --nginx -d $DOMAIN --redirect"
