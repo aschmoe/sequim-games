@@ -52,6 +52,24 @@ node tools/bot.js "$PWD/dist/index.html"
 node tools/dnd2test.js "$PWD/dist/index.html" /tmp/shots fighter 0.04
 ```
 
+## Deploying
+
+Every push to `main` builds the page and ships it to the server (`.github/workflows/deploy.yml`).
+The server keeps the last 5 releases in `/srv/sequim-games/releases/`, and nginx serves whichever one
+the `current` symlink points at.
+
+One-time setup:
+
+1. On your laptop, make a key used only for deploys:
+   `ssh-keygen -t ed25519 -N "" -C sequim-deploy -f ~/.ssh/sequim_deploy`
+2. Add a DNS A record for the game's hostname pointing at the server.
+3. On the server, as root: `bash deploy/setup-server.sh <hostname> "<contents of ~/.ssh/sequim_deploy.pub>"`
+4. Add the three repo secrets the script prints (`DEPLOY_HOST`, `DEPLOY_KNOWN_HOSTS`, `DEPLOY_SSH_KEY`).
+
+Rollback, on the server: `ls -t /srv/sequim-games/releases`, then
+`sudo -u deploy ln -sfn releases/<name> /srv/sequim-games/current`.
+Or re-run an earlier Deploy workflow from the Actions tab.
+
 ## Scores
 
 Scores are kept in `localStorage` for now. A small shared score API is planned for deployment.

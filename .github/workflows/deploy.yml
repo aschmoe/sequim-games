@@ -1,0 +1,46 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: ./build.sh
+
+      - name: Check deploy secrets
+        id: check
+        run: |
+          if [ -n "$DEPLOY_HOST" ]; then echo "ready=true" >> "$GITHUB_OUTPUT"
+          else echo "::notice::DEPLOY_HOST secret not set, skipping deploy (build only)."; fi
+
+      - name: Configure SSH
+        if: steps.check.outputs.ready == 'true'
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Upload and switch release
+        if: steps.check.outputs.ready == 'true'
+        run: |
+          REL="$(date -u +%Y%m%d-%H%M%S)-${GITHUB_SHA::7}"
+          rsync -rz --chmod=D755,F644 dist/ "deploy@$DEPLOY_HOST:/srv/sequim-games/releases/$REL/"
+          # Atomic symlink swap, then keep the 5 newest releases for rollback
+          ssh "deploy@$DEPLOY_HOST" "cd /srv/sequim-games && ln -sfn releases/$REL current.tmp && mv -Tf current.tmp current && ls -1dt releases/*/ | tail -n +6 | xargs -r rm -rf"
+          echo "Live: https://$DEPLOY_HOST ($REL)"
