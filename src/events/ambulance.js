@@ -8,7 +8,12 @@
   const MAX = SEG * 60, ACCEL = MAX / 4.5, BRAKE = MAX * 1.1, OFFROAD_DECEL = MAX * .7, OFFROAD_LIMIT = MAX * .3;
   const STEER = 3.4, CENTRIFUGAL = .3, PW = .15; // PW: half the ambulance's width, road edge = 1
   const MILES = 17;                              // Sequim to Port Angeles on 101, roughly
-  const DRAIN = 1.3;                             // patient health lost per second, always
+  // balance knobs; tools/ambbot.js can override them through window.__ambTune to compare settings
+  const TUNE = Object.assign({
+    drain: 1.15,                                 // patient health lost per second, always
+    medkit: 20, wrench: 20, wine: 30,            // what each pickup restores
+    pothole: 4,                                  // patient + ambulance damage per pothole
+  }, window.__ambTune || {});
   const HOLD = 1.5;                              // stretches every straight and curve; sets the run length
   const CURVE = .6;                              // scales every curve in COURSE; lower is gentler
 
@@ -198,7 +203,7 @@
   // things on the road: potholes everywhere, hay off farm trucks near Sequim, logs off logging
   // trucks on 101, and road-work zones whose cones close a lane
   const HAZARD = {
-    pothole: { ww: 420, hw: .14, amb: 6, patient: 7, slow: .85, msg: 'POTHOLE!' },
+    pothole: { ww: 420, hw: .14, amb: TUNE.pothole, patient: TUNE.pothole, slow: .85, msg: 'POTHOLE!' },
     cone: { ww: 130, hw: .06, amb: 5, patient: 3, slow: .92, msg: 'CONE!', fly: true },
     hay: { ww: 300, hw: .13, amb: 16, patient: 9, cap: .35, msg: 'HAY BALE!', fly: true, crash: true },
     log: { ww: 650, hw: .27, amb: 22, patient: 12, cap: .25, msg: 'LOG!', crash: true },
@@ -303,7 +308,7 @@
 
       if (s.phase === 'drive') {
         // health: the patient always needs the hospital; rough driving costs both bars
-        s.patient -= DRAIN * dt;
+        s.patient -= TUNE.drain * dt;
         if (off && s.speed > OFFROAD_LIMIT * .5) { s.patient -= 3 * dt; s.amb -= 2 * dt; s.shake = Math.max(s.shake, .6); }
         // traffic. Checked against where the ambulance was last frame too, so a slow frame can't skip a car.
         const pz = s.pos + PLAYER_Z, pzOld = before + PLAYER_Z, segOld = segAt(pzOld);
@@ -343,9 +348,9 @@
         for (const p of s.pickups) {
           if (p.got || p.seg < segOld.i - 1 || p.seg > pseg.i + 1 || Math.abs(p.x - s.x) > .32) continue;
           p.got = true; s.picked++;
-          if (p.kind === 'medkit') { s.patient = Math.min(100, s.patient + 15); say('+ PATIENT', '#ff8ab0'); Sound.jingle([659, 880, 1175], { step: .05 }); }
-          else if (p.kind === 'wrench') { s.amb = Math.min(100, s.amb + 20); say('+ AMBULANCE', '#4fd6ff'); Sound.jingle([523, 659, 784], { step: .05, type: 'triangle' }); }
-          else { s.patient = Math.min(100, s.patient + 25); s.wine++; s.wineT = 4; say('SWEET WHITE WINE!', '#f4cc80', 2); Sound.jingle([784, 988, 1175, 1568], { step: .07, type: 'triangle' }); }
+          if (p.kind === 'medkit') { s.patient = Math.min(100, s.patient + TUNE.medkit); say('+ PATIENT', '#ff8ab0'); Sound.jingle([659, 880, 1175], { step: .05 }); }
+          else if (p.kind === 'wrench') { s.amb = Math.min(100, s.amb + TUNE.wrench); say('+ AMBULANCE', '#4fd6ff'); Sound.jingle([523, 659, 784], { step: .05, type: 'triangle' }); }
+          else { s.patient = Math.min(100, s.patient + TUNE.wine); s.wine++; s.wineT = 4; say('SWEET WHITE WINE!', '#f4cc80', 2); Sound.jingle([784, 988, 1175, 1568], { step: .07, type: 'triangle' }); }
         }
         if (s.patient <= 0) { s.patient = 0; end('patient'); }
         else if (s.amb <= 0) { s.amb = 0; end('ambulance'); }

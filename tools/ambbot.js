@@ -1,9 +1,10 @@
 // drives Golden Hour like a decent human: looks ahead for curves, cars and pickups, reacts with noisy timing
 const { chromium } = (() => { try { return require('playwright'); } catch { return require('/opt/node22/lib/node_modules/playwright'); } })();
 (async () => {
-  const [,, file, sd = '0.06', skill = '1'] = process.argv;
+  const [,, file, sd = '0.06', skill = '1', tune = '{}'] = process.argv;   // tune: JSON overrides for TUNE in ambulance.js
   const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 640, height: 360 } });
   p.on('pageerror', e => console.log('pageerror:', e.message));
+  await p.addInitScript(t => { window.__ambTune = JSON.parse(t); }, tune);
   await p.addInitScript(([sd, skill]) => {
     window.__ambDebug = (s, k) => {
       window.S = s; window.K = k; const gauss = () => { let u = 0; for (let i = 0; i < 6; i++) u += Math.random(); return u / 6 - .5; };
