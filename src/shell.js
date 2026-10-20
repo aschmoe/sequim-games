@@ -1,7 +1,9 @@
 // ===== shell: event registry + the screens every event shares =====
 const PORTRAIT = {};
-// To add an event: call registerEvent({...}) with an id, menu text, an icon, and create(api).
-// create(api) returns { update(dt), draw(ctx), destroy?() } and calls api.finish({ score, stats }) when the run ends.
+// To add an event: drop a file in src/events/ that calls registerEvent({...}) with an id, menu text,
+// an icon (a name from ICONS, or its own function(c, x, y) drawing 24x24), and create(api).
+// create(api) returns { update(dt), draw(ctx), pause?(on), destroy?() } and calls api.finish({ score, headline, stats }).
+// It shows up in the menu after the PLANNED ones; nothing else needs to change.
 const EVENTS = [];
 function registerEvent(def) { EVENTS.push(def); }
 
@@ -93,15 +95,25 @@ const TitleScene = {
 const MenuScene = {
   // fsRect: tap target the engine checks inside the tap itself (fullscreen needs a live gesture); fsKey: F toggles
   fsKey: true,
-  enter() { this.list = menuEvents(); this.t = 0; this.flash = null; this.sel = this.sel ?? 0; this.fsRect = Fullscreen.supported && !KEYBOARD ? [110, 156, 110, 24] : null; },
+  enter() {
+    this.list = menuEvents(); this.t = 0; this.flash = null; this.sel = Math.min(this.sel ?? 0, this.list.length - 1);
+    this.fsRect = Fullscreen.supported && !KEYBOARD ? [110, 156, 110, 24] : null;
+    // four events get roomy rows; more get compact ones, and past five the list scrolls
+    this.rowH = this.list.length <= 4 ? 32 : 26; this.maxScroll = Math.max(0, this.list.length * this.rowH - 130); this.scroll = this.scroll ?? 0; this.reveal();
+  },
+  reveal() { const y = this.sel * this.rowH; this.scroll = clamp(Math.min(this.scroll, y), y + this.rowH - 4 - 130, this.maxScroll); this.scroll = clamp(this.scroll, 0, this.maxScroll); },
+  rowY(i) { return 24 + i * this.rowH - Math.round(this.scroll); },
   update(dt) {
     this.t += dt;
     const pick = i => { const e = this.list[i]; this.sel = i;
       if (e.create) { Sound.tone(880, .08); Shell.go(new PlayScene(e)); }
       else { Sound.tone(160, .12, { type: 'triangle' }); this.flash = { i, t: 1.2 }; } };
-    this.list.forEach((e, i) => { if (Input.tapIn(8, 26 + i * 32, 304, 28)) pick(i); });
-    if (Input.keyPressed('ArrowDown', 'KeyS')) { this.sel = (this.sel + 1) % this.list.length; Sound.tone(520, .04); }
-    if (Input.keyPressed('ArrowUp', 'KeyW')) { this.sel = (this.sel + this.list.length - 1) % this.list.length; Sound.tone(520, .04); }
+    if (this.maxScroll) for (const p of Input.ptrs.values()) if (!p.ui && p.sy > 22 && p.sy < 154) { // drag to scroll
+      p.lastY ??= p.sy; this.scroll = clamp(this.scroll - (p.y - p.lastY), 0, this.maxScroll); p.lastY = p.y;
+    }
+    this.list.forEach((e, i) => { const y = this.rowY(i); if (y > 10 && y < 150 && Input.tapIn(8, Math.max(22, y), 304, this.rowH - 2)) pick(i); });
+    if (Input.keyPressed('ArrowDown', 'KeyS')) { this.sel = (this.sel + 1) % this.list.length; this.reveal(); Sound.tone(520, .04); }
+    if (Input.keyPressed('ArrowUp', 'KeyW')) { this.sel = (this.sel + this.list.length - 1) % this.list.length; this.reveal(); Sound.tone(520, .04); }
     if (Input.keyPressed('Enter', 'Space')) pick(this.sel);
     if (Input.tapIn(0, 156, 110, 24) || Input.keyPressed('KeyH')) Shell.go(new ScoresScene(this.list.find(e => e.create)?.id, -1, MenuScene));
     if (Input.tapIn(220, 156, 100, 24) || Input.keyPressed('KeyM')) { Sound.toggle(); Sound.tone(660, .06); }
@@ -111,19 +123,29 @@ const MenuScene = {
     R(c, 0, 0, W, H, '#14102a');
     bands(c, ['#2e4486', '#7c84c0', '#d8a6b8', '#f8d4a4'], [6, 5, 5, 4]);
     TS(c, 'SELECT EVENT', 160, 6, '#ffffff', '#2a1250', { a: 'c' });
+    const compact = this.rowH < 32, rh = this.rowH, bh = compact ? rh - 2 : rh - 4, ib = compact ? 22 : 24, ty = compact ? 4 : 5, sy = compact ? 14 : 16, my = compact ? 9 : 10;
+    c.save(); c.beginPath(); c.rect(0, 22, W, 132); c.clip();
     this.list.forEach((e, i) => {
-      const y = 26 + i * 32, live = !!e.create;
+      const y = this.rowY(i), live = !!e.create;
+      if (y > 156 || y + bh < 22) return;
       const sel = KEYBOARD && i === this.sel;
-      box(c, 8, y, 304, 28, live ? '#241c4c' : '#1a1636', sel ? '#ffd84a' : live ? '#a070e0' : '#2e2856', live || sel ? 2 : 1);
-      box(c, 11, y + 2, 24, 24, '#0e0c22', '#2e2856'); ICONS[e.icon]?.(c, 11, y + 2);
-      T(c, e.name, 42, y + 5, live ? '#ffd84a' : '#8a84b0');
-      T(c, e.sub, 42, y + 16, live ? '#c8b8f0' : '#6a6490', { f: 's' });
+      box(c, 8, y, 304, bh, live ? '#241c4c' : '#1a1636', sel ? '#ffd84a' : live ? '#a070e0' : '#2e2856', live || sel ? 2 : 1);
+      const ix = 11, iy = y + (bh - ib) / 2; box(c, ix, iy, ib, ib, '#0e0c22', '#2e2856');
+      c.save(); c.beginPath(); c.rect(ix + 1, iy + 1, ib - 2, ib - 2); c.clip();
+      const off = (ib - 24) / 2; (typeof e.icon === 'function' ? e.icon : ICONS[e.icon])?.(c, ix + off, iy + off); c.restore();
+      T(c, e.name, 42 - (24 - ib), y + ty, live ? '#ffd84a' : '#8a84b0');
+      T(c, e.sub, 42 - (24 - ib), y + sy, live ? '#c8b8f0' : '#6a6490', { f: 's' });
       const best = live ? Scores.best(e.id) : null;
-      if (this.flash?.i === i) T(c, 'COMING SOON', 306, y + 10, '#ff8ab0', { f: 's', a: 'r' });
-      else if (!live) T(c, 'SOON', 306, y + 10, '#6a6490', { f: 's', a: 'r' });
-      else if (best) { T(c, fmt(best.score), 306, y + 5, '#ffffff', { a: 'r' }); T(c, best.name, 306, y + 16, '#ffd84a', { f: 's', a: 'r' }); }
-      else T(c, KEYBOARD ? 'ENTER TO PLAY' : 'TAP TO PLAY', 306, y + 10, '#ffffff', { f: 's', a: 'r' });
+      if (this.flash?.i === i) T(c, 'COMING SOON', 306, y + my, '#ff8ab0', { f: 's', a: 'r' });
+      else if (!live) T(c, 'SOON', 306, y + my, '#6a6490', { f: 's', a: 'r' });
+      else if (best) { T(c, fmt(best.score), 306, y + ty, '#ffffff', { a: 'r' }); T(c, best.name, 306, y + sy, '#ffd84a', { f: 's', a: 'r' }); }
+      else T(c, KEYBOARD ? 'ENTER TO PLAY' : 'TAP TO PLAY', 306, y + my, '#ffffff', { f: 's', a: 'r' });
     });
+    c.restore();
+    if (this.maxScroll) { // scroll hints
+      if (this.scroll > 1) T(c, '^', 314, 24, '#4fd6ff', { f: 's', a: 'r' });
+      if (this.scroll < this.maxScroll - 1) T(c, 'v', 314, 146, '#4fd6ff', { f: 's', a: 'r' });
+    }
     T(c, KEYBOARD ? 'H: HIGH SCORES' : 'HIGH SCORES', 10, 164, '#4fd6ff', { f: 's' });
     if (KEYBOARD) T(c, 'ARROWS + ENTER', 160, 164, '#8a84b0', { f: 's', a: 'c' });
     else if (this.fsRect) T(c, Fullscreen.active ? 'EXIT FULL SCREEN' : 'FULL SCREEN', 160, 164, '#4fd6ff', { f: 's', a: 'c' });

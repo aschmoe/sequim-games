@@ -6,7 +6,7 @@ mkdir -p dist
 {
   cat src/page-head.html
   echo '<script>'
-  cat src/art.js src/engine.js src/shell.js src/events/volt.js src/events/patch.js src/events/stage.js src/events/dnd.js
+  cat src/art.js src/engine.js src/shell.js src/events/*.js   # every event file; menu order comes from shell.js
   echo 'boot();'
   echo '</script>'
 } > dist/index.html

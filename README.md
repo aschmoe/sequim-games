@@ -1,7 +1,7 @@
 # Sequim Games
 
 A retro, California Games-style browser game made as a birthday gift for Sebastian and Misha.
-Four events, one shared scoreboard, built for Android phones held sideways (desktop works too).
+Five events, one shared scoreboard, built for Android phones held sideways (desktop works too).
 
 | Event | Star | What you do |
 |---|---|---|
@@ -9,6 +9,7 @@ Four events, one shared scoreboard, built for Android phones held sideways (desk
 | Patch Panic | Sebastian | Patch a modular synth and play the rhythm before the groove falls apart |
 | Opening Night | Misha | Hit your marks, poses and lines in an avant-garde three-act play |
 | Roll for Initiative | Misha | Real-time D&D battle ending with Sebastian the Terrible, Lord of the Volts |
+| Golden Hour | Misha | Drive the ambulance up 101 to Port Angeles before the patient (Sebastian) gives up |
 
 ## Build
 
@@ -32,10 +33,20 @@ There is no framework and no bundler: `build.sh` concatenates the files in `src/
 
 ## Adding an event
 
-1. Create `src/events/<id>.js` and call `registerEvent({ id, name, star, sub, icon, create })`.
-2. `create(api)` returns `{ update(dt), draw(ctx), pause?, destroy? }` and calls
-   `api.finish({ score, headline, stats })` when the run ends.
-3. Add the file to `build.sh` and the id to `PLANNED` in `src/shell.js` to set its menu position.
+Add one file, `src/events/<id>.js`, that calls
+
+```js
+registerEvent({ id, name, star: 'misha' | 'sebastian', sub, icon, create });
+```
+
+- `icon` is a function `(c, x, y)` that draws a 24x24 menu icon (or a name from `ICONS` in `shell.js`).
+- `create(api)` returns `{ update(dt), draw(ctx), pause?(on), destroy?() }` and calls
+  `api.finish({ score, headline, stats })` when the run ends. The shell handles the pause button,
+  results, name entry, high scores and the shared scoreboard.
+
+That's all: `build.sh` picks up every file in `src/events/`, the menu makes room (compact rows past
+four events, scrolling past five), and the scoreboard accepts any event id. Events in `PLANNED` in
+`shell.js` keep their menu position; new ones follow.
 
 ## Phones
 
@@ -58,6 +69,7 @@ The bots in `tools/` drive a built page through debug hooks (`window.__voltDebug
 node tools/shot.js "$PWD/dist/index.html" out.png
 node tools/bot.js "$PWD/dist/index.html"
 node tools/dnd2test.js "$PWD/dist/index.html" /tmp/shots fighter 0.04
+node tools/ambbot.js "$PWD/dist/index.html" 0.06 0.98   # Golden Hour: timing noise, skill
 ```
 
 ## Deploying
