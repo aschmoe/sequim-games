@@ -14,7 +14,8 @@ const { chromium } = (() => { try { return require('playwright'); } catch { retu
         if (now >= nextThink) {
           nextThink = now + 120 + Math.abs(gauss()) * sd * 4000;      // reaction time
           const seg = Math.floor((s.pos + k.PLAYER_Z) / k.SEG), lanes = [-2 / 3, 0, 2 / 3];
-          const blocked = lx => s.cars.some(c => { const d = (c.z - s.pos - k.PLAYER_Z) / k.SEG; return d > -1 && d < 28 && Math.abs(c.x - lx) < .36; });
+          const blocked = lx => s.cars.some(c => { const d = (c.z - s.pos - k.PLAYER_Z) / k.SEG; return d > -1 && d < 28 && Math.abs(c.x - lx) < .36; })
+            || (s.hazards || []).some(h => !h.hit && h.seg - seg > -1 && h.seg - seg < 24 && Math.abs(h.x - lx) < .4);
           const pick = s.pickups.find(q => !q.got && q.seg - seg > 2 && q.seg - seg < 34 && (q.kind !== 'wrench' || s.amb < 85) && (q.kind === 'wrench' || s.patient < 92));
           const free = lanes.filter(l => !blocked(l));
           if (pick && !blocked(pick.x)) target = pick.x;
@@ -40,7 +41,7 @@ const { chromium } = (() => { try { return require('playwright'); } catch { retu
     if (Date.now() - lastLog > 15000) { console.log(JSON.stringify(st)); lastLog = Date.now(); }
     if (st.phase === 'end') { await p.waitForTimeout(3800); break; }
   }
-  const res = await p.evaluate(() => ({ end: S.endKind, t: +S.time.toFixed(1), pat: +S.patient.toFixed(0), amb: +S.amb.toFixed(0), crashes: S.crashes, picked: S.picked, wine: S.wine, scene: Shell.scene.constructor?.name }));
+  const res = await p.evaluate(() => ({ end: S.endKind, t: +S.time.toFixed(1), pat: +S.patient.toFixed(0), amb: +S.amb.toFixed(0), crashes: S.crashes, bumps: S.bumps, picked: S.picked, wine: S.wine, scene: Shell.scene.constructor?.name }));
   console.log('RESULT', JSON.stringify(res));
   await b.close();
 })();
