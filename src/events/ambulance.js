@@ -8,7 +8,7 @@
   const MAX = SEG * 60, ACCEL = MAX / 4.5, BRAKE = MAX * 1.1, OFFROAD_DECEL = MAX * .7, OFFROAD_LIMIT = MAX * .3;
   const STEER = 2.3, CENTRIFUGAL = .3, PW = .15; // PW: half the ambulance's width, road edge = 1
   const MILES = 17;                              // Sequim to Port Angeles on 101, roughly
-  const DRAIN = 1.15;                            // patient health lost per second, always
+  const DRAIN = 1.05;                            // patient health lost per second, always
   const HOLD = 1.5;                              // stretches every straight and curve; sets the run length
 
   // ---------- sprites (built on first play, after the fonts load) ----------
@@ -83,6 +83,17 @@
     return s;
   }
   function line2(g, x0, y0, x1, y1, ch) { const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)); for (let i = 0; i <= n; i++) pts(g, [[Math.round(x0 + (x1 - x0) * i / n), Math.round(y0 + (y1 - y0) * i / n)]], ch); }
+  // Sebastian as the patient: his portrait with a head bandage wrapped over the forehead
+  const patientCache = {};
+  function patientFace(mood) {
+    if (patientCache[mood]) return patientCache[mood];
+    const rows = sebastianPortrait(mood).map(r => [...r]);
+    for (let y = 4; y <= 7; y++) { const xs = rows[y].map((ch, x) => ch !== '.' ? x : -1).filter(x => x >= 0); if (!xs.length) continue;
+      const a = xs[0], b = xs[xs.length - 1];
+      for (let x = a + 1; x < b; x++) rows[y][x] = y === 4 || y === 7 ? 'x' : 'w'; }
+    rows[5][11] = 'r'; rows[6][11] = 'r'; rows[5][12] = 'r'; rows[6][10] = 'R'; // a little spot where he hit the trail
+    return (patientCache[mood] = sprite(rows.map(r => r.join(''))));
+  }
   const signCache = {};
   function textSign(key, bg, fg, a, b) {
     if (signCache[key]) return signCache[key];
@@ -418,12 +429,13 @@
       // progress along 101
       R(c, 124, 7, 108, 1, '#5a5a8a'); R(c, 124 + Math.round(108 * clamp((s.pos + PLAYER_Z) / (finish * SEG), 0, 1)) - 1, 5, 3, 5, '#ffffff');
       T(c, 'H', 236, 4, '#ff8ab0', { f: 's' }); T(c, ZONES[segAt(s.pos + PLAYER_Z).zone].name, 178, 12, '#c8b8f0', { f: 's', a: 'c' });
-      const mood = s.wineT > 0 ? 'shades' : s.patient < 35 ? 'grimace' : 'happy';
-      blit(c, PORTRAIT['seb_' + mood] ||= sprite(sebastianPortrait(mood)), 284, 140);
+      // Misha drives (bottom right); Sebastian, the patient, reacts to how it's going (bottom left)
+      blit(c, PORTRAIT.misha, 284, 140);
+      blit(c, patientFace(s.wineT > 0 ? 'shades' : s.patient < 35 ? 'grimace' : 'happy'), 4, 140);
       if (s.msg) TO(c, s.msg.text, 160, 40, s.msg.col, '#0e0c14', null, { a: 'c' });
       if (s.phase === 'intro') {
         box(c, 30, 30, 260, 120, '#0e0c1e', '#a070e0', 2);
-        blit(c, PORTRAIT.misha, 40, 40); blit(c, PORTRAIT.seb_grimace ||= sprite(sebastianPortrait('grimace')), 248, 40);
+        blit(c, PORTRAIT.misha, 40, 40); blit(c, patientFace('grimace'), 248, 40);
         TS(c, 'GOLDEN HOUR', 160, 38, '#ffd84a', '#a03a8a', { a: 'c' });
         ['MISHA IS SHOOTING A HOSPITAL', 'DRAMA. SEBASTIAN JUST WIPED', 'OUT ON HIS E-BOARD. THE PROP', 'AMBULANCE WILL HAVE TO DO.'].forEach((l, i) => T(c, l, 160, 56 + i * 9, '#ffffff', { f: 's', a: 'c' }));
         T(c, 'GET HIM TO PORT ANGELES!', 160, 96, '#ff8ab0', { f: 's', a: 'c' });
