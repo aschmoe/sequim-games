@@ -1,0 +1,225 @@
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <div class="bezel"><canvas class="screen" id="title" width="320" height="180" data-scene="title"></canvas></div>
+    </div>
+    <div class="hero-copy">
+      <span class="eyebrow">Design board v3 · Oct 19, 2026</span>
+      <h1>Sequim Games</h1>
+      <p class="lede">A California Games style collection for two brothers-in-law. Four short events, one for each of their interests, played in the phone's browser. Every screen below is drawn at the game's real resolution: 320 by 180 pixels, scaled up.</p>
+      <a class="playlink" href="https://claude.ai/artifact/P6v2ZhU7KvNbEsfHh5i1Wu" target="_blank" rel="noopener">PLAY THE PROTOTYPE &gt;</a>
+      <div class="chips">
+        <span class="chip">SEBASTIAN · <b>NOV 3</b> · 15 days</span>
+        <span class="chip late">MISHA · <b>SEP 16</b> · belated</span>
+        <span class="chip">4 EVENTS · <b>SHARED SCOREBOARD</b></span>
+        <span class="chip">ANDROID · <b>BROWSER, NO APP</b></span>
+      </div>
+      <p>Each brother gets his own link. It lists his two events first. There's no character select and no birthday screen: each event stars the brother it was made for, and anyone can play any event to go after the high scores.</p>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">The athletes</span>
+      <h2>Drawn from your photos</h2>
+      <p class="lede">32 by 38 pixel portraits for the title screen. In the events they shrink to 16 pixel sprites. These are a first pass, so tell me what's off.</p>
+    </div>
+    <div class="athletes">
+      <div class="athlete">
+        <canvas width="32" height="38" data-portrait="seb" aria-label="Pixel portrait of Sebastian"></canvas>
+        <div class="who">
+          <h3>Sebastian</h3>
+          <ul>
+            <li>Short auburn beard, big grin, outdoorsy</li>
+            <li>Black quarter-zip with the little mountain logo</li>
+            <li>Stars in Volt Run (in a helmet) and Patch Panic, and he's the final boss of Roll for Initiative</li>
+          </ul>
+        </div>
+      </div>
+      <div class="athlete">
+        <canvas width="32" height="38" data-portrait="misha" aria-label="Pixel portrait of Misha"></canvas>
+        <div class="who">
+          <h3>Misha</h3>
+          <ul>
+            <li>Long brown hair with a middle part, big grin</li>
+            <li>Black zip sweater over a dark tee</li>
+            <li>Stars in Opening Night and Roll for Initiative, cameos in Volt Run</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">How a session goes</span>
+      <h2>Pick an event, chase the record</h2>
+    </div>
+    <div class="flow">
+      <figure>
+        <span class="step">STEP 1</span>
+        <div class="bezel"><canvas class="screen" width="320" height="180" data-scene="events"></canvas></div>
+        <figcaption>Tap the lavender title screen and you land here. Each event shows whose it is, the current record, and who holds it, which is most of the motivation.</figcaption>
+      </figure>
+      <figure>
+        <span class="step">STEP 2</span>
+        <div class="bezel"><canvas class="screen" width="320" height="180" data-scene="scores"></canvas></div>
+        <figcaption>Beat a top-10 score and enter a name, up to 10 letters, on an arcade keyboard. Scores live on your server, so everyone sees the same board.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">The events</span>
+      <h2>Two for each brother, about a minute each</h2>
+      <p class="lede">Every event uses one simple touch control, the way the originals each used one joystick move.</p>
+    </div>
+
+    <article class="event">
+      <div class="shot"><div class="bezel"><canvas class="screen" width="320" height="180" data-scene="volt"></canvas></div></div>
+      <div class="meta">
+        <span class="owner">SEBASTIAN · ELECTRIC SKATEBOARD</span>
+        <h2>Volt Run</h2>
+        <span class="status live">PLAYABLE NOW</span>
+        <p>Sebastian rides home through three stretches: downtown, the waterfront bike path under the Olympics, and the forest trails. The catch is the battery: throttle drains it and only lightning bolts refill it, so coast where you can. Each stretch has a patch of rough ground (cobblestones, gravel, rocks) with a 16 mph limit, and hitting it too fast shakes you off the board. Run dry and he kick-pushes the rest of the way. Sophia is waiting at the finish line with a sign.</p>
+        <dl class="kv">
+          <dt>CONTROLS</dt><dd>Hold the right side to go, hold the left side to brake, swipe up to hop.</dd>
+          <dt>HAZARDS</dt><dd>Cones, potholes and speed bumps downtown. Hans (a big black dog) and Lexie (a golden retriever) dart across the bike path. Roots and rocks on the trails. Misha stands on the sidewalk rehearsing Hamlet: hop over him, or slow down and he steps aside.</dd>
+          <dt>PICKUPS</dt><dd>Lightning bolts float in the air, so you hop to grab them (+8% each). Coffee gives a short speed burst with no battery drain.</dd>
+          <dt>SCORE</dt><dd>Finish time, battery left, bolts grabbed, minus wipeouts. A careful run lands around 10,000. A dead-battery run lands around 4,500.</dd>
+          <dt>THE BIT</dt><dd>Speed wobble. Hold the throttle down a hill and the screen starts to shake. Let off the gas or eat pavement. Coasting is always safe.</dd>
+        </dl>
+        <div class="ask"><strong>DECIDED</strong>Generic board, all three settings, helmet on.</div>
+      </div>
+    </article>
+
+    <article class="event">
+      <div class="shot"><div class="bezel"><canvas class="screen" width="320" height="180" data-scene="synth"></canvas></div></div>
+      <div class="meta">
+        <span class="owner">SEBASTIAN · MOOG SYNTH</span>
+        <h2>Patch Panic</h2>
+        <span class="status live">PLAYABLE NOW</span>
+        <p>A Moog-style modular rack and a handful of patch cables, with Sebastian at the controls in the corner. Three rounds: Bass Line (100 bpm, 3 cables, with guide lines), Acid (110 bpm, 4 cables) and Filter Sweep (120 bpm, 5 cables). Each opens with a patch card: drag cables between the jacks before the timer runs out, and the faster you finish, the bigger the bonus. After the first round the guide lines go away, but each output that still needs a cable blinks in its card color, and if you hold a cable for a second its destination lights up. Then the song starts: pulses travel down your cables and you tap each jack as a pulse lands. Every hit plays a lead note over a synthesized backing track, and a miss plays a sour one.</p>
+        <dl class="kv">
+          <dt>CONTROLS</dt><dd>Drag to plug a cable. Tap a jack on the beat (or D F J K L on a keyboard). During the sweep, a slider panel appears: keep the dot in the moving green band by sliding your finger up and down.</dd>
+          <dt>CHAOS</dt><dd>In rounds 2 and 3 a cable pops out mid-song and dangles. Drag the plug back in before the groove meter drains.</dd>
+          <dt>SEBASTIAN</dt><dd>His portrait reacts to how you're playing: nodding on the beat when the groove is on, grimacing and sweating after a miss, and sunglasses on at a 16-note combo.</dd>
+          <dt>SCORE</dt><dd>Perfect and good hits with a combo multiplier, the patch bonus, the sweep, and the groove meter at the end. A wrong jack costs 100.</dd>
+        </dl>
+        <div class="ask"><strong>DECIDED</strong>Moog gear, electronic music, and an original backing track written for the game.</div>
+      </div>
+    </article>
+
+    <article class="event">
+      <div class="shot"><div class="bezel"><canvas class="screen" width="320" height="180" data-scene="stage"></canvas></div></div>
+      <div class="meta">
+        <span class="owner">MISHA · AVANT-GARDE THEATRE</span>
+        <h2>Opening Night</h2>
+        <span class="status live">PLAYABLE NOW</span>
+        <p>THE LAVENDER KING, an avant-garde tragedy in three acts of three beats. Act I: a stranger arrives in Sequim, meets a bearded farmer and is offered sweet white wine. Act II: the wine runs out, Hans and Lexie look very guilty, and he claims the throne. Act III: the fog rolls in, the dogs come back with a bottle, and he gives his final words. About two and a half minutes.</p>
+        <dl class="kv">
+          <dt>THE VIBE</dt><dd>Two wheels set each act's mood (menacing, joyful, bored, romantic, panicked, regal) and style (operatic, whispered, robotic, Shakespearean, interpretive).</dd>
+          <dt>THE SCRIPT</dt><dd>A prompt book on the left runs each beat as CUE, MOVE, ACTION, LINE, BOW on a musical count. The step in progress opens up with its options; once you choose, it rolls up into a line showing your choice and its pips, so the whole performance so far stays readable.</dd>
+          <dt>MOVE</dt><dd>A real stage direction (DOWNSTAGE LEFT is the actor's left, your right). Walk the 2D stage with a hot/cold meter; the mark is revealed with how many feet off you were.</dd>
+          <dt>ACTION</dt><dd>Three story actions, one per style. When he's offered wine: raise the glass to the rafters, sip it like a secret, drink in 3 precise motions, toast the heavens, or become the wine. Scored against the act's style, and Misha strikes the matching pose.</dd>
+          <dt>LINE</dt><dd>Three lines, the same story moment in different moods. Scored against the act's mood.</dd>
+          <dt>TIMING</dt><dd>Generous windows, but the play moves on the count after you choose, with a bonus for picking quickly.</dd>
+          <dt>BOW</dt><dd>Roses float down slowly onto pink target rings; go catch them. Tomatoes are fast and aimed where you're heading.</dd>
+        </dl>
+        <div class="ask"><strong>REDESIGNED TWICE</strong>Now three beats per act, story actions instead of generic poses, a rolling prompt book, longer windows that end early when you choose, and fairer roses with nastier tomatoes.</div>
+      </div>
+    
+    
+    </article>
+
+    <article class="event">
+      <div class="shot"><div class="bezel"><canvas class="screen" width="320" height="180" data-scene="dnd"></canvas></div></div>
+      <div class="meta">
+        <span class="owner">MISHA · DUNGEONS &amp; DRAGONS</span>
+        <h2>Roll for Initiative</h2>
+        <span class="status live">PLAYABLE NOW</span>
+        <p>A four-room dungeon crawl starring Misha. Pick his class, then fight through the Goblin Den, More Goblins, the Orc's Cellar, and the Volt Throne, where Sebastian the Terrible, Lord of the Volts, waits on his electric board. It runs in real time: everyone has a charge gauge, Misha acts the moment his fills, and each enemy strikes the moment its own fills. About two minutes.</p>
+        <dl class="kv">
+          <dt>CLASSES</dt><dd>Fighter (34 HP, Cleave: one timed swing at every enemy). Wizard (22 HP, two Fireballs: tap as fast as you can for two seconds to power one up). Bard (26 HP, Vicious Mockery: pick the insult that hits the enemy's listed weakness for big damage and a stun).</dd>
+          <dt>ATTACK</dt><dd>Time slows while you aim. A marker sweeps across a bar; stop it near the center for a high d20. Dead center is a natural 20 and a critical hit; the very edge is a natural 1 and Misha trips over his cape.</dd>
+          <dt>BLOCK</dt><dd>When an enemy strikes, a ring closes on Misha. One tap per strike: perfect blocks take nothing, good ones take half, early or late takes it all. Rings differ by attack, and the orc's smash stalls halfway to catch early tappers.</dd>
+          <dt>DECISIONS</dt><dd>Every enemy shows its next move and its gauge, so you can race to kill the orc before its 14-damage smash lands. Whenever you're ready: attack, your special, a Sweet White Wine (heals 12), or Guard (halves damage for 6 seconds). Between rooms, pick a reward: more wine, more max HP, more damage or another special use.</dd>
+          <dt>THE BOSS</dt><dd>Sebastian zaps you with lightning bolts. Every third attack his battery runs low and he plugs into the wall for a few seconds: his guard drops and your damage doubles, so hit him fast. Below half health he zaps twice.</dd>
+        </dl>
+        <div class="ask"><strong>DECIDED</strong>Always Misha, three classes, Sebastian as the boss, sweet white wine for potions.</div>
+      </div>
+    
+    </article>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">Look, sound, and build</span>
+      <h2>1987 on the screen, 2026 under the hood</h2>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3>Look &amp; sound</h3>
+        <div class="swatches" id="swatches" aria-label="Game palette"></div>
+        <ul>
+          <li><b>Art:</b> everything drawn in pixels at 320 by 180, scaled up with no smoothing, landscape only.</li>
+          <li><b>Type:</b> Press Start 2P for headlines and scores, Silkscreen for small text.</li>
+          <li><b>Music:</b> one short chiptune loop per event, plus a title theme.</li>
+          <li><b>Sound effects:</b> generated in code (ZzFX), so no audio files to manage.</li>
+          <li><b>Patch Panic</b> uses real Web Audio oscillators and filters, so patching actually changes the sound.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Build &amp; ship</h3>
+        <ul>
+          <li><b>Engine:</b> plain canvas and JavaScript, no framework. All the art is drawn in code, so a game engine wouldn't add much.</li>
+          <li><b>Adding events:</b> a shared shell runs the title, menu, pause, results, name entry, and scores. Each event is one self-contained file that registers itself, so a fifth game is one new file.</li>
+          <li><b>Hosting:</b> one Docker setup on your DigitalOcean server. Caddy serves the game with automatic HTTPS.</li>
+          <li><b>Scoreboard:</b> a tiny Node and SQLite service next to it. Top 10 per event, no accounts. The prototype keeps scores on your phone until then.</li>
+          <li><b>Links:</b> <code>/sebastian</code> and <code>/misha</code> list that brother's events first.</li>
+          <li><b>Testing:</b> a work-in-progress link you can open on your phone throughout, then a final pass in Chrome on Android.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">Schedule</span>
+      <h2>Sebastian's birthday is the deadline</h2>
+      <p class="lede">His events come first. Misha's gift is already belated, so it can go out the same day or right after.</p>
+    </div>
+    <div class="tablewrap">
+      <table class="sched">
+        <thead><tr><th>DATES</th><th>WHAT GETS DONE</th></tr></thead>
+        <tbody>
+          <tr><td>OCT 19</td><td>Design settled. Shell and Volt Run playable on your phone.</td></tr>
+          <tr><td>OCT 19</td><td>Volt Run tuned from your feedback. Patch Panic playable.</td></tr>
+          <tr><td>OCT 19</td><td>Patch Panic retuned. Opening Night playable.</td></tr>
+          <tr><td>OCT 20</td><td>Opening Night reworked. Roll for Initiative playable: all four events in.</td></tr>
+          <tr><td>OCT 21 – 23</td><td>Feedback rounds on all four events.</td></tr>
+          <tr><td>OCT 24 – 25</td><td>Repo, server, and the shared scoreboard.</td></tr>
+          <tr><td>OCT 26 – 29</td><td>Opening Night and Roll for Initiative.</td></tr>
+          <tr><td>OCT 30 – NOV 1</td><td>Music, sound polish, cameos, and testing on Android.</td></tr>
+          <tr><td>NOV 2</td><td>Freeze. Clear the test scores.</td></tr>
+          <tr class="goal"><td>NOV 3</td><td>Both links go out.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">Your turn</span>
+      <h2>What I need from you</h2>
+      <p class="lede">Most of the answers are in. These are still open.</p>
+    </div>
+    <ul class="questions">
+      <li><b>Volt Run feel</b>Play the prototype on your phone. Is it too hard, too easy, too long? Do the controls work with your thumbs?</li>
+      <li><b>Vibe wheel words</b>Swap any of the twelve words for ones that would make Misha laugh.</li>
+      <li><b>Sophia</b>Her sign says "GO UNCLE SEB!" at the finish line. Right, or should it say something else? I drew her generically, so tell me her hair color and what she likes to wear.</li>
+      <li><b>Domain and repo</b>Later, as you said. Everything works as a private prototype link until then.</li>
+    </ul>
+  </section>
+</div>

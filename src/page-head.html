@@ -1,0 +1,21 @@
+<title>Sequim Games</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen&display=swap">
+<style>
+/* One full-screen arcade canvas; deliberately single dark look. */
+:root{ --bg:#000000; --ink:#f1ecff; --sun:#ffd84a; color-scheme:dark; }
+html,body{height:100%;box-sizing:border-box}
+html{overflow:hidden}
+body{background:var(--bg);color:var(--ink);margin:0;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;overscroll-behavior:none;
+  display:flex;align-items:center;justify-content:center;padding-left:max(0px,env(safe-area-inset-left,0px));padding-right:max(0px,env(safe-area-inset-right,0px))}
+#screen{outline:none;display:block;image-rendering:pixelated;image-rendering:crisp-edges;touch-action:none;background:#000}
+#rotate{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:var(--bg);text-align:center;
+  font:12px/1.8 "Press Start 2P",monospace;color:var(--sun);padding:24px}
+#rotate small{font:12px/1.6 "Silkscreen",monospace;color:var(--ink)}
+@media (orientation:portrait) and (pointer:coarse){ #rotate{display:flex} }
+@media (prefers-reduced-motion:reduce){ #rotate .phone{animation:none} }
+#rotate .phone{width:34px;height:56px;border:4px solid var(--ink);border-radius:6px;animation:turn 1.6s ease-in-out infinite}
+@keyframes turn{0%,30%{transform:rotate(0)}60%,100%{transform:rotate(-90deg)}}
+</style>
+<canvas id="screen" width="320" height="180" tabindex="0" aria-label="Sequim Games"></canvas>
+<div id="rotate"><div class="phone"></div>TURN YOUR PHONE SIDEWAYS<small>Sequim Games plays in landscape</small></div>

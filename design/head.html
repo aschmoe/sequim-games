@@ -1,0 +1,96 @@
+<title>Sequim Games Board</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Press+Start+2P&family=Silkscreen&display=swap">
+<style>
+/* Layout: one arcade-cabinet column; each event is a screen beside its rules. Deliberately single dark theme. */
+:root{
+  --bg:#110c22; --panel:#1a1433; --line:#2e2654; --ink:#f1ecff; --dim:#b3a8d6; --sun:#ffd84a; --hot:#ff3f8a; --cool:#4fd6ff; --bezel:#07050f;
+  --display:"Press Start 2P", "Courier New", monospace; --label:"Silkscreen", "Courier New", monospace;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 var(--body);}
+.wrap{max-width:1120px;margin:0 auto;padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:64px}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance;margin:0}
+h1{font-size:clamp(22px,4.4vw,34px);line-height:1.35;color:var(--sun);text-shadow:3px 3px 0 #b02a5e}
+h2{font-size:clamp(15px,2.4vw,19px);line-height:1.5;color:var(--ink)}
+h3{font-size:13px;line-height:1.6;color:var(--sun)}
+p{margin:0;max-width:65ch}
+.eyebrow{font:13px/1.4 var(--label);letter-spacing:.06em;color:var(--cool);text-transform:uppercase}
+.lede{color:var(--dim);font-size:17px}
+.screen{display:block;width:100%;max-width:100%;aspect-ratio:16/9;image-rendering:pixelated;background:#000;border-radius:4px}
+.bezel{background:var(--bezel);padding:10px;border-radius:12px;box-shadow:0 0 0 2px var(--line),0 18px 40px -18px #000;}
+.bezel .screen{border-radius:3px}
+.caption{font:12px/1.5 var(--label);color:var(--dim);letter-spacing:.04em;margin-top:10px}
+section{display:flex;flex-direction:column;gap:22px}
+.sec-head{display:flex;flex-direction:column;gap:8px}
+
+.hero{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:32px;align-items:center}
+.hero-copy{display:flex;flex-direction:column;gap:18px;min-width:0}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{font:12px/1 var(--label);letter-spacing:.05em;padding:9px 11px;border:1px solid var(--line);border-radius:4px;background:var(--panel);color:var(--ink)}
+.chip b{color:var(--sun);font-weight:400}
+.chip.late b{color:var(--hot)}
+.playlink{display:inline-flex;align-items:center;gap:10px;font:12px/1 var(--display);color:#1a0f00;background:var(--sun);padding:14px 16px;border-radius:6px;text-decoration:none;width:max-content;box-shadow:3px 3px 0 #a03a8a}
+.playlink:focus-visible{outline:2px solid var(--cool);outline-offset:3px}
+.status{font:11px/1 var(--label);letter-spacing:.06em;padding:5px 7px;border-radius:3px;background:#2a1a3a;color:var(--dim);width:max-content}
+.status.live{background:#173a24;color:#7ef0a0}
+.toggle{display:flex;gap:0;margin-top:12px;border:1px solid var(--line);border-radius:6px;overflow:hidden;width:max-content}
+.toggle button{font:12px/1 var(--label);letter-spacing:.05em;background:var(--panel);color:var(--dim);border:0;padding:10px 14px;cursor:pointer}
+.toggle button[aria-pressed="true"]{background:var(--sun);color:#1a0f00}
+.toggle button:focus-visible{outline:2px solid var(--cool);outline-offset:-2px}
+
+.athletes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.athlete{display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:start;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:20px}
+.athlete canvas{width:128px;height:152px;image-rendering:pixelated;background:#24183f;border-radius:4px}
+.athlete .who{display:flex;flex-direction:column;gap:10px;min-width:0}
+.athlete ul{margin:0;padding-left:18px;color:var(--dim)}
+
+.flow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.flow figure{margin:0;min-width:0}
+.step{font:12px/1 var(--label);color:var(--sun);letter-spacing:.06em;display:block;margin-bottom:8px}
+.flow figcaption{color:var(--dim);font-size:15px;margin-top:10px}
+
+.event{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:28px;align-items:start;padding-top:28px;border-top:1px solid var(--line)}
+.event .meta{display:flex;flex-direction:column;gap:16px;min-width:0}
+.owner{font:12px/1 var(--label);letter-spacing:.06em;color:var(--hot)}
+.event h2{color:var(--sun)}
+.kv{display:grid;grid-template-columns:7.5rem minmax(0,1fr);gap:8px 14px;margin:0}
+.kv dt{font:12px/1.9 var(--label);letter-spacing:.05em;color:var(--cool)}
+.kv dd{margin:0;color:var(--ink)}
+.ask{background:#221a40;border-left:3px solid var(--sun);padding:12px 14px;border-radius:0 6px 6px 0;color:var(--dim);font-size:15px}
+.ask strong{color:var(--sun);font:12px/1.8 var(--label);letter-spacing:.05em;display:block}
+.event .shot{min-width:0;display:flex;flex-direction:column}
+
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:20px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.card ul{margin:0;padding-left:18px;color:var(--dim)}
+.card li+li{margin-top:6px}
+.card li b{color:var(--ink);font-weight:700}
+.swatches{display:flex;flex-wrap:wrap;gap:6px}
+.sw{width:30px;height:30px;border-radius:3px;box-shadow:inset 0 0 0 1px #ffffff22}
+
+.sched{width:100%;border-collapse:collapse;font-size:15px}
+.sched th,.sched td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+.sched th{font:12px/1.4 var(--label);letter-spacing:.05em;color:var(--cool);font-weight:400}
+.sched td:first-child{font:12px/1.7 var(--label);letter-spacing:.04em;color:var(--sun);white-space:nowrap}
+.sched tr.goal td{color:var(--ink);background:#2a1a3a}
+.sched tr.goal td:first-child{color:var(--hot)}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+
+.questions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:0;padding:0;list-style:none}
+.questions li{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px 18px;color:var(--dim)}
+.questions li b{display:block;color:var(--ink);margin-bottom:4px}
+
+@media (max-width:860px){
+  .hero,.event,.grid2,.athletes,.questions{grid-template-columns:minmax(0,1fr)}
+  .flow{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:460px){
+  .athlete{grid-template-columns:minmax(0,1fr)}
+  .kv{grid-template-columns:minmax(0,1fr)}
+  .kv dt{line-height:1.4}
+}
+</style>
