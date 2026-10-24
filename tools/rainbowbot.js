@@ -16,12 +16,12 @@ const { chromium } = (() => { try { return require('playwright'); } catch { retu
         while (t < 3) {
           const xp = x, yp = y; x += v * dt; t += dt;
           if (dbl !== null && t >= dbl) { vy = -k.JUMP2; dbl = null; }
-          vy = Math.min(vy + k.GRAV * dt, 720); y += vy * dt; if (y < 40) { y = 40; vy = Math.max(vy, 0); }
-          for (const q of grounds) if (q.x0 >= xp + 5 && q.x0 < x + 5 && y > q.y + 3) x = q.x0 - 5;
-          if (boost - t <= 0 && brambles.some(o => !o.got && x + 6 > o.x + 3 && x - 6 < o.x + o.w - 3 && y > o.y - o.h + 3)) return false;
+          vy = Math.min(vy + k.GRAV * dt, 720); y += vy * dt; if (y < k.CEIL) { y = k.CEIL; vy = Math.max(vy, 0); }
+          for (const q of grounds) if (q.x0 >= xp + 8 && q.x0 < x + 8 && y > q.y + 3) x = q.x0 - 8;
+          if (boost - t <= 0 && brambles.some(o => !o.got && x + k.HB.r > o.x + 3 && x - k.HB.l < o.x + o.w - 3 && y > o.y - o.h + 3)) return false;
           if (vy >= 0) for (const q of k.surfaces) { if (x < q.x0 || x > q.x1) continue; if (yp <= q.yAt(Math.max(q.x0, Math.min(q.x1, xp))) + 2 && y >= q.yAt(x)) {
             // landed: make sure we are not landing right on top of a bramble
-            return !(boost - t <= 0 && brambles.some(o => !o.got && x + 6 > o.x + 3 && x - 6 < o.x + o.w - 3)); } }
+            return !(boost - t <= 0 && brambles.some(o => !o.got && x + k.HB.r > o.x + 3 && x - k.HB.l < o.x + o.w - 3)); } }
           if (y > 220) return false;
         }
         return false;
@@ -30,13 +30,14 @@ const { chromium } = (() => { try { return require('playwright'); } catch { retu
       const press = () => { Input.pressed.add('Space'); Input.keys.add('Space'); holdUntil = performance.now() + 260; noise = gauss() * sd; };
       setInterval(() => {
         if (performance.now() > holdUntil) Input.keys.delete('Space');
+        if (s.boost > 0 && !s.over && s.start <= 0) window.__boostT = (window.__boostT || 0) + .016;
         if (s.start > 0 || s.rescue || s.over) return;
         const v = Math.max(s.v, 60), lead = Math.max(0, .05 + noise) * v;
         if (s.on) {
           // what is coming if we keep running
           let edge = null, thorn = null;
           for (let d = 0; d < 260; d += 2) { if (!support(s.x + d, s.on.kind === 'arc' ? s.on.yAt(Math.min(s.on.x1, s.x + d)) : s.y)) { edge = d; break; } }
-          const br = s.boost > 0 ? null : brambles.find(o => !o.got && o.x + o.w > s.x - 4 && o.x - s.x < 140); if (br) thorn = br.x - s.x;
+          const br = s.boost > 0 ? null : brambles.find(o => !o.got && o.x + o.w > s.x - 4 && o.x - s.x < 140); if (br) thorn = br.x - s.x - k.HB.r;
           const canSingle = fly(s.x, s.y, -k.JUMP, v, null, s.boost), canDouble = !canSingle && [.25, .3, .35, .4, .45].some(t => fly(s.x, s.y, -k.JUMP, v, t, s.boost));
           if (edge !== null && edge <= 10 + lead && (canSingle || canDouble || edge <= 4)) press();
           else if (thorn !== null && thorn < 34 + lead && canSingle) press();
@@ -50,10 +51,10 @@ const { chromium } = (() => { try { return require('playwright'); } catch { retu
   while (Date.now() - t0 < 200000) {
     await p.waitForTimeout(250);
     const st = await p.evaluate(() => window.S ? { x: S.x, over: S.over, done: S.done, start: S.start } : null);
-    if (shots && st && st.start <= 0 && Math.floor(st.x / 1200) > lastShot) { lastShot = Math.floor(st.x / 1200); await p.screenshot({ path: `${shots}/r-${String(++n).padStart(2, '0')}.png` }); }
+    if (shots && st && st.start <= 0 && Math.floor(st.x / 1600) > lastShot) { lastShot = Math.floor(st.x / 1600); await p.screenshot({ path: `${shots}/r-${String(++n).padStart(2, '0')}.png` }); }
     if (await p.evaluate(() => Shell.scene?.constructor?.name === 'ResultsScene')) break;
   }
-  const r = await p.evaluate(() => ({ time: +(S.time ?? S.clock).toFixed(1), sparkles: S.sparkles, total: K.objs.filter(o => o.k === 'spark').length, gems: S.gems, best: S.best, falls: S.falls, bumps: S.bumps, score: Shell.scene.r?.score, headline: Shell.scene.r?.headline }));
+  const r = await p.evaluate(() => ({ time: +(S.time ?? S.clock).toFixed(1), sparkles: S.sparkles, total: K.objs.filter(o => o.k === 'spark').length, boostSecs: +(window.__boostT || 0).toFixed(1), gems: S.gems, best: S.best, falls: S.falls, bumps: S.bumps, score: Shell.scene.r?.score, headline: Shell.scene.r?.headline }));
   if (shots) await p.screenshot({ path: `${shots}/r-results.png` });
   console.log(JSON.stringify(r));
   await b.close();

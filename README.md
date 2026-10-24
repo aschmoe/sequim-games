@@ -10,7 +10,7 @@ Five events plus a bonus round, one shared scoreboard, built for Android phones 
 | Opening Night | Misha | Hit your marks, poses and lines in an avant-garde three-act play |
 | Roll for Initiative | Misha | Real-time D&D battle ending with Sebastian the Terrible, Lord of the Volts |
 | Golden Hour | Misha | Drive the ambulance up 101 to Port Angeles before the patient (Sebastian) gives up |
-| Rainbow Rush (bonus) | Sophia | Run, jump and double jump over candy clouds, lavender hills and the starlight sky, grabbing sparkles and riding rainbows |
+| Rainbow Rush (bonus) | Sophia | Ride a unicorn over candy clouds, lavender hills, chocolate hills and the starlight sky, grabbing sparkles to keep the speed boosts going |
 
 ## Build
 
