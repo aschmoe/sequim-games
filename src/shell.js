@@ -33,9 +33,9 @@ const PLANNED = [
 function menuEvents() {
   const list = PLANNED.map(p => EVENTS.find(e => e.id === p.id) || p);
   for (const e of EVENTS) if (!list.includes(e)) list.push(e);
-  // a personal link (#misha or /misha) lists that brother's events first
+  // a personal link (#misha or /misha, also #sophia) lists that person's events first
   const who = (location.hash.slice(1) || location.pathname.split('/').pop() || '').toLowerCase();
-  if (who === 'misha' || who === 'sebastian') list.sort((a, b) => (b.star === who) - (a.star === who));
+  if (['misha', 'sebastian', 'sophia'].includes(who)) list.sort((a, b) => (b.star === who) - (a.star === who));
   return list;
 }
 

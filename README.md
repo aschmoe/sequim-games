@@ -1,7 +1,7 @@
 # Sequim Games
 
 A retro, California Games-style browser game made as a birthday gift for Sebastian and Misha.
-Five events, one shared scoreboard, built for Android phones held sideways (desktop works too).
+Five events plus a bonus round, one shared scoreboard, built for Android phones held sideways (desktop works too).
 
 | Event | Star | What you do |
 |---|---|---|
@@ -10,6 +10,7 @@ Five events, one shared scoreboard, built for Android phones held sideways (desk
 | Opening Night | Misha | Hit your marks, poses and lines in an avant-garde three-act play |
 | Roll for Initiative | Misha | Real-time D&D battle ending with Sebastian the Terrible, Lord of the Volts |
 | Golden Hour | Misha | Drive the ambulance up 101 to Port Angeles before the patient (Sebastian) gives up |
+| Rainbow Rush (bonus) | Sophia | Run, jump and double jump over candy clouds, lavender hills and the starlight sky, grabbing sparkles and riding rainbows |
 
 ## Build
 
@@ -58,18 +59,19 @@ always fullscreen (`static/manifest.webmanifest`). Icons are drawn from the titl
 ## Handy URLs
 
 - `#play-<id>` starts an event directly, for example `#play-volt`
-- `#misha` or `#sebastian` (or `/misha`, `/sebastian`) puts that brother's events first
+- `#misha`, `#sebastian` or `#sophia` (or `/misha` and so on) puts that person's events first
 
 ## Testing
 
 The bots in `tools/` drive a built page through debug hooks (`window.__voltDebug`, `__patchDebug`,
-`__stageDebug`, `__dndDebug`):
+`__stageDebug`, `__dndDebug`, `__ambDebug`, `__rainbowDebug`):
 
 ```sh
 node tools/shot.js "$PWD/dist/index.html" out.png
 node tools/bot.js "$PWD/dist/index.html"
 node tools/dnd2test.js "$PWD/dist/index.html" /tmp/shots fighter 0.04
 node tools/ambbot.js "$PWD/dist/index.html" 0.06 0.98   # Golden Hour: timing noise, skill
+node tools/rainbowbot.js "$PWD/dist/index.html" 0.06    # Rainbow Rush: jump timing noise in seconds
 ```
 
 ## Deploying
