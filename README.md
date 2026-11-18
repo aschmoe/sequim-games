@@ -116,3 +116,5 @@ To run everything locally:
 DB_PATH=/tmp/scores.db node server/server.js   # terminal 1
 ./build.sh && node tools/dev-server.js         # terminal 2, then open http://localhost:8080
 ```
+
+# update
